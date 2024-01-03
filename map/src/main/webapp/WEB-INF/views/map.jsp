@@ -39,7 +39,7 @@
 
     <button type="button" id="makeMarker">make marker</button>
     <button type="button" id="moveMarker">move marker</button>
-    <p>깃 정상화 확인</p>
+    <button type="button" id="deleteAllMarkers">delete all marker</button>
     <script src="/resources/js/ol.js"></script>
     <script src="/resources/js/maker.js"></script>
     </body>
