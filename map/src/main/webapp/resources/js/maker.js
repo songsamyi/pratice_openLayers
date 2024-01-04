@@ -30,69 +30,12 @@ var map = new ol.Map({
     })
 });
 
-
-var markerLayer = new ol.layer.Vector(); // 전역 변수로 선언
-
-// 클릭 가능하도록 Interaction 추가
-addClickInteraction();
-
-function addClickInteraction() {
-    // 기존 마커 레이어와 새로 생성된 마커 레이어를 합치기
-    var allMarkerLayers = [markerLayer].concat(markerArray.map(marker => marker.layer));
-
-    // 클릭 가능하도록 Interaction 추가
-    selectClick = new ol.interaction.Select({
-        condition: ol.events.condition.click,
-        layers: allMarkerLayers,
-        style: null
-    });
-
-    selectClick.on('select', function (e) {
-        if (e.selected && e.selected.length > 0) {
-            var selectedMarker = e.selected[0];
-            
-            if (selectedMarker && selectedMarker.getProperties) {
-                var selectedFeature = selectedMarker.getProperties().feature;
-    
-                if (selectedFeature && selectedFeature.get) {
-                    var name = selectedFeature.get('name');
-                    var coordinates = selectedFeature.getGeometry().getFlatCoordinates();
-    
-                    alert("마커 이름: " + name + "\n위치 좌표: " + coordinates);
-                }
-            }
-        }
-    });
-    
-    
-
-    map.addInteraction(selectClick);
-    map.addLayer(markerLayer);
-}
-
-
-/* 지도에 클릭 이벤트 리스너 추가 */
-map.on('click', function (event) {
-    // 클릭한 피처 가져오기
-    var clickedFeature = map.forEachFeatureAtPixel(event.pixel, function (feature) {
-        return feature;
-    });
-
-    // 클릭한 피처가 마커인 경우 선택 이벤트 발생
-    if (clickedFeature && clickedFeature.get('name')) {
-        var name = clickedFeature.get('name');
-        var coordinates = clickedFeature.getGeometry().getFlatCoordinates();
-
-        alert("마커 이름: " + name + "\n위치 좌표: " + coordinates);
-    }
-});
-
 var markerArray = []; // 사용자가 입력한 정보를 저장할 배열
 var markerLayer;
 var feature;
 /* 클릭 가능하도록 Interaction 추가 */
 var selectClick;
-var userInput;
+var userInput
 /* 버튼 클릭 시 지도에 마커 표시하기 시작 */
 document.getElementById("makeMarker").addEventListener("click", () => {
     // 이전에 생성된 selectClick 제거
@@ -147,7 +90,8 @@ document.getElementById("makeMarker").addEventListener("click", () => {
             layer: markerLayer
         });
 
-        
+        // 클릭 가능하도록 Interaction 추가
+        addClickInteraction();
 
         console.log("Added Marker Feature:", feature.getProperties());
         console.log("Added Marker Layer:", markerLayer.getProperties());
@@ -156,7 +100,39 @@ document.getElementById("makeMarker").addEventListener("click", () => {
     }
 });
 
+function addClickInteraction() {
+    // 기존 마커 레이어와 새로 생성된 마커 레이어를 합치기
+    var allMarkerLayers = [markerLayer].concat(markerArray.map(marker => marker.layer));
 
+    // 클릭 가능하도록 Interaction 추가
+    selectClick = new ol.interaction.Select({
+        condition: ol.events.condition.click,
+        layers: allMarkerLayers,
+        style: null
+    });
+
+    selectClick.on('select', function (e) {
+        if (e.selected && e.selected.length > 0) {
+            var selectedMarker = e.selected[0];
+            
+            if (selectedMarker && selectedMarker.getProperties) {
+                var selectedFeature = selectedMarker.getProperties().feature;
+    
+                if (selectedFeature && selectedFeature.get) {
+                    var name = selectedFeature.get('name');
+                    var coordinates = selectedFeature.getGeometry().getFlatCoordinates();
+    
+                    alert("마커 이름: " + name + "\n위치 좌표: " + coordinates);
+                }
+            }
+        }
+    });
+    
+    
+
+    map.addInteraction(selectClick);
+    map.addLayer(markerLayer);
+}
 
 
 /* 버튼 클릭 시 마커 이동하기 시작 */
