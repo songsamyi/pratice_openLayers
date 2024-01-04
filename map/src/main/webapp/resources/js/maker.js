@@ -30,94 +30,161 @@ var map = new ol.Map({
     })
 });
 
-var markerArray = []; // 사용자가 입력한 정보를 저장할 배열
 
+var markerLayer = new ol.layer.Vector(); // 전역 변수로 선언
+
+// 클릭 가능하도록 Interaction 추가
+addClickInteraction();
+
+function addClickInteraction() {
+    // 기존 마커 레이어와 새로 생성된 마커 레이어를 합치기
+    var allMarkerLayers = [markerLayer].concat(markerArray.map(marker => marker.layer));
+
+    // 클릭 가능하도록 Interaction 추가
+    selectClick = new ol.interaction.Select({
+        condition: ol.events.condition.click,
+        layers: allMarkerLayers,
+        style: null
+    });
+
+    selectClick.on('select', function (e) {
+        if (e.selected && e.selected.length > 0) {
+            var selectedMarker = e.selected[0];
+            
+            if (selectedMarker && selectedMarker.getProperties) {
+                var selectedFeature = selectedMarker.getProperties().feature;
+    
+                if (selectedFeature && selectedFeature.get) {
+                    var name = selectedFeature.get('name');
+                    var coordinates = selectedFeature.getGeometry().getFlatCoordinates();
+    
+                    alert("마커 이름: " + name + "\n위치 좌표: " + coordinates);
+                }
+            }
+        }
+    });
+    
+    
+
+    map.addInteraction(selectClick);
+    map.addLayer(markerLayer);
+}
+
+
+/* 지도에 클릭 이벤트 리스너 추가 */
+map.on('click', function (event) {
+    // 클릭한 피처 가져오기
+    var clickedFeature = map.forEachFeatureAtPixel(event.pixel, function (feature) {
+        return feature;
+    });
+
+    // 클릭한 피처가 마커인 경우 선택 이벤트 발생
+    if (clickedFeature && clickedFeature.get('name')) {
+        var name = clickedFeature.get('name');
+        var coordinates = clickedFeature.getGeometry().getFlatCoordinates();
+
+        alert("마커 이름: " + name + "\n위치 좌표: " + coordinates);
+    }
+});
+
+var markerArray = []; // 사용자가 입력한 정보를 저장할 배열
+var markerLayer;
+var feature;
+/* 클릭 가능하도록 Interaction 추가 */
+var selectClick;
+var userInput;
 /* 버튼 클릭 시 지도에 마커 표시하기 시작 */
 document.getElementById("makeMarker").addEventListener("click", () => {
+    // 이전에 생성된 selectClick 제거
+    if (selectClick) {
+        map.removeInteraction(selectClick);
+    }
 
-    var userInput = prompt("marker의 이름을 입력하세요.", "");
+    userInput = prompt("marker의 이름을 입력하세요.", "");
 
     if (userInput !== null) {
-        // 사용자가 취소 버튼을 누르지 않은 경우
         alert(userInput + "를 표시할 좌표를 지도에서 클릭해주세요.");
     }
 
-    var feature; // 클로저 안에서 사용할 feature 변수 정의
-    var markerLayer; // 클로저 안에서 사용할 markerLayer 변수 정의
+
+
 
     // 지도에 클릭 이벤트 리스너 추가
     map.once('click', function (event) {
-        // 클릭한 위치의 좌표를 얻음
         var coordinate = event.coordinate;
-        console.log("클릭된 좌표 : ", coordinate);
-        // 좌표를 경도와 위도로 변환
         var lonLat = ol.proj.toLonLat(coordinate);
-        console.log("경도와 위도 : ", lonLat);
 
-        // 얻은 좌표를 이용하여 마커 추가 또는 다른 작업 수행
         addMarker(lonLat[0], lonLat[1], userInput);
     });
 
-    function addMarker(lon, lat, name) { // 경도 위도 이름값(마커들을 구분하기위해)
-        // 마커 feature 설정
+    function addMarker(lon, lat, userInput) {
         feature = new ol.Feature({
-            geometry: new ol.geom.Point(ol.proj.fromLonLat([lon, lat])), // 경도 위도에 포인트 설정
-            name: name
+            geometry: new ol.geom.Point(ol.proj.fromLonLat([lon, lat])),
+            name: userInput
         });
 
-        // 마커 스타일 설정
         var markerStyle = new ol.style.Style({
-            image: new ol.style.Icon({ // 마커 이미지
-                opacity: 1, // 투명도 1=100%
-                scale: 1, // 크기 1=100%
+            image: new ol.style.Icon({
+                opacity: 1,
+                scale: 1,
                 src: '/resources/img/icon_cctv.png'
             }),
             zIndex: 10
         });
 
-        // 마커 레이어에 들어갈 소스 생성
         var markerSource = new ol.source.Vector({
-            features: [feature] // feature의 집합
+            features: [feature]
         });
 
-        // 마커 레이어 생성
         markerLayer = new ol.layer.Vector({
-            source: markerSource, // 마커 feature들
-            style: markerStyle // 마커 스타일
+            source: markerSource,
+            style: markerStyle
         });
 
-        // 클릭 가능하도록 Interaction 추가
-        var selectClick = new ol.interaction.Select({
-            condition: ol.events.condition.click,
-            layers: [markerLayer],
-            style: null
-        });
-
-        // 마커 선택 이벤트 처리
-        selectClick.on('select', function (e) {
-            if (e.selected.length > 0) {
-                alert(name + " 선택");
-            }
-            if (e.deselected.length > 0) {
-                alert("해제");
-            }
-        });
-
-        map.addInteraction(selectClick);
-
-        // 지도에 마커가 그려진 레이어 추가
-        map.addLayer(markerLayer);
-
-        // 배열에 좌표 정보 추가
         markerArray.push({
-            name: name,
+            name: userInput,
             feature: feature,
             layer: markerLayer
         });
 
+        
+
+        console.log("Added Marker Feature:", feature.getProperties());
+        console.log("Added Marker Layer:", markerLayer.getProperties());
+        
         console.log(markerArray);
     }
 });
+
+
+
+
+/* 버튼 클릭 시 마커 이동하기 시작 */
+document.getElementById("moveMarker").addEventListener("click", ()=>{
+
+    alert("마우스로 마커를 이동시켜주세요.");
+
+    // 마커를 드래그하여 이동시키기 위한 Modify interaction 추가
+    var modify = new ol.interaction.Modify({
+        features: new ol.Collection([feature]),
+        style: null
+    });
+
+        // Modify interaction 이벤트 핸들러 등록
+        modify.on('modifystart', function () {
+            map.getTargetElement().style.cursor = 'grabbing';
+        });
+
+        modify.on('modifyend', function () {
+            map.getTargetElement().style.cursor = 'pointer';
+        });
+    // Modify interaction을 지도에 추가
+    map.addInteraction(modify);
+
+    return;
+});
+/* 버튼 클릭 시 마커 이동하기 끝 */
+
 
 /* 버튼 클릭 시 모든 마커 삭제하기 시작 */
 document.getElementById("deleteAllMarkers").addEventListener("click", function () {
@@ -140,3 +207,5 @@ document.getElementById("deleteAllMarkers").addEventListener("click", function (
     console.log("배열 삭제확인 : ", markerArray);
     alert("모든 마커를 삭제했습니다.");
 });
+
+
