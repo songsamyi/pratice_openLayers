@@ -7,15 +7,14 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
-    <script src="/resources/node_modules/jquery/3.6.0/jquery.min.js"></script>
+    <script src="/resources/js/jquery/jquery.min.js"></script>
     <link rel="stylesheet" href="/resources/css/ol.css">
     <style type="text/css">
     .map {
         width: 100%;
         height:1000px;
-        }
+    }
     </style>
-    <script src="https://unpkg.com/elm-pep"></script>
     <title>OpenLayer 지도|좌표확인</title>
     </head>
     <body>
@@ -40,6 +39,7 @@
     <button type="button" id="makeMarker">make marker</button>
     <button type="button" id="moveMarker">move marker</button>
     <button type="button" id="deleteAllMarkers">delete all marker</button>
+    <button type="button" id="deleteSelectMarkers">delete select marker</button>
     <script src="/resources/js/ol.js"></script>
     <script src="/resources/js/maker.js"></script>
     </body>
