@@ -36,6 +36,12 @@
     </form>
     <%-- 지도 투영과 정밀도 선택 끝 --%>
 
+    <%-- 팝업컨테이너 --%>
+    <div id="popup" class="ol-popup" style="background-color: white; padding: 1px 5px;">
+        <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+        <div id="popup-content"></div>
+    </div>
+
     <button type="button" id="makeMarker">make marker</button>
     <button type="button" id="moveMarker">move marker</button>
     <button type="button" id="deleteAllMarkers">delete all marker</button>
