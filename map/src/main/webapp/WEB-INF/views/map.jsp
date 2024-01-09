@@ -8,6 +8,7 @@
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     <script src="/resources/js/jquery/jquery.min.js"></script>
+        <script src="/resources/js/ol.js"></script>
     <link rel="stylesheet" href="/resources/css/ol.css">
     <style type="text/css">
     .map {
@@ -25,6 +26,7 @@
     <%-- 지도표시 공간 끝 --%>
 
     <%-- 지도 투영과 정밀도 선택 시작 --%>
+    <%--
     <form>
         <label>Projection</label>
         <select id="projection">
@@ -34,6 +36,7 @@
         <label>Precision</label>
         <input id="precision" type="number" min="0" max="12" value="4"/>
     </form>
+    --%>
     <%-- 지도 투영과 정밀도 선택 끝 --%>
 
     <%-- 팝업컨테이너 --%>

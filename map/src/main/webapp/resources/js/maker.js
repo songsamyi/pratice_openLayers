@@ -11,6 +11,7 @@ var mousePositionControl = new ol.control.MousePosition({
 });
 /* 마우스 위치 컨트롤 생성 끝 */
 
+/* 지도 생성 시작 */
 var map = new ol.Map({
     // 기본 제어 옵션에 마우스 위치 컨트롤을 추가
     controls: ol.control.defaults().extend([mousePositionControl]),
@@ -29,6 +30,9 @@ var map = new ol.Map({
         zoom: 18
     })
 });
+/* 지도 생성 끝 */
+
+
 
 var markerArray = []; // 사용자가 입력한 정보를 저장할 배열
 var markerLayer;
@@ -46,11 +50,8 @@ document.getElementById("makeMarker").addEventListener("click", () => {
     userInput = prompt("marker의 이름을 입력하세요.", "");
 
     if (userInput !== null) {
-        alert(userInput + "를 표시할 좌표를 지도에서 클릭해주세요.");
+        alert(userInput + "를 표시할 곳을 지도에서 클릭해주세요.");
     }
-
-
-
 
     // 지도에 클릭 이벤트 리스너 추가
     map.once('click', function (event) {
@@ -109,20 +110,33 @@ const popup = new ol.Overlay({
 });
 map.addOverlay(popup);
 
-// 맵 클릭 이벤트 리스너
-map.on('pointermove', (event) => {
-    const feature = map.forEachFeatureAtPixel(event.pixel, (feature) => feature);
+
+// 맵 포인터 이벤트 리스너
+map.on('pointermove', (e) => {
+    const feature = map.forEachFeatureAtPixel(e.pixel, (feature) => feature);
+
+    const precision = 4; // 표시할 소수점 이하 자릿수
+
     if (feature) {
-    const coordinates = feature.getGeometry().getCoordinates();
-    const name = feature.get('name');
-    const content = `<p>이름: ${name}</p><p>좌표: ${ol.coordinate.toStringHDMS(ol.proj.toLonLat(coordinates))}</p>`;
-    
-    // 팝업 내용 및 위치 설정
-    popup.setPosition(coordinates);
-    popup.getElement().innerHTML = content;
+        const coordinates = feature.getGeometry().getCoordinates();
+
+        // 위도와 경도를 소수점 이하 4자리까지 문자열로 변환
+        const formattedCoordinates = coordinates
+            .map(coord => coord.toFixed(precision))
+            .join(', ');
+
+        const name = feature.get('name');
+        const content = `<p>이름: ${name}</p><p>좌표: ${formattedCoordinates}</p>`;
+
+        // 마커가 있는 곳에 마우스가 올려지면 커서의 스타일을 pointer로 설정
+        map.getTargetElement().style.cursor = map.hasFeatureAtPixel(e.pixel) ? 'pointer' : '';
+
+        // 팝업 내용 및 위치 설정
+        popup.setPosition(coordinates);
+        popup.getElement().innerHTML = content;
     } else {
-    // 클릭한 피쳐가 없으면 팝업 숨기기
-    popup.setPosition(undefined);
+        // 클릭한 피쳐가 없으면 팝업 숨기기
+        popup.setPosition(undefined);
     }
 });
 
@@ -156,8 +170,6 @@ function addClickInteraction() {
         }
     });
     
-    
-    
     map.addInteraction(selectClick);
     map.addLayer(markerLayer);
 }
@@ -165,7 +177,6 @@ function addClickInteraction() {
 
 
 /* 버튼 클릭 시 마커 이동하기 시작 */
-
 document.getElementById("moveMarker").addEventListener("click", ()=>{
     
     alert("마우스로 마커를 이동시켜주세요.");
@@ -190,7 +201,6 @@ document.getElementById("moveMarker").addEventListener("click", ()=>{
     
     return;
 });
-
 /* 버튼 클릭 시 마커 이동하기 끝 */
 
 
@@ -217,5 +227,4 @@ document.getElementById("deleteAllMarkers").addEventListener("click", function (
     alert("모든 마커를 삭제했습니다.");
 });
 */
-
 
