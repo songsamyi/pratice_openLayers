@@ -196,17 +196,14 @@ document.getElementById("deleteAllMarkers").addEventListener("click", function (
 /* 버튼 클릭 시 레이어 생성 시작 */
 
 // 시작점과 끝점 좌표를 저장할 변수를 선언합니다.
-var startPoint;
-var endPoint;
+var startPoint = null;
+var endPoint = null;
 document.getElementById("makeLayer").addEventListener("click", ()=>{
     confirm("레이어를 생성하시겠습니까?");
 
     alert("레이어의 시작점을 클릭해주세요.");
-    // 클릭 이벤트를 추가합니다.
-    startPoint = null;
-    endPoint = null;
 
-    // 클릭 이벤트 핸들러를 등록합니다.
+    // 클릭 이벤트를 추가합니다.
     map.once('click', function (e) {
         // 클릭한 지점의 좌표를 가져옵니다.
         var clickedCoordinate = e.coordinate;
