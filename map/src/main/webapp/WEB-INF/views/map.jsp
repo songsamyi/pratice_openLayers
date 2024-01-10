@@ -49,6 +49,8 @@
     <button type="button" id="moveMarker">move marker</button>
     <button type="button" id="deleteAllMarkers">delete all marker</button>
     <button type="button" id="deleteSelectMarkers">delete select marker</button>
+    <br><br>
+    <button type="button" id="makeLayer">make Layer</button>
     <script src="/resources/js/ol.js"></script>
     <script src="/resources/js/maker.js"></script>
     </body>

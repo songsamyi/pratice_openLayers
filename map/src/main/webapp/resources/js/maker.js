@@ -110,7 +110,7 @@ map.addOverlay(popup);
 
 
 // 맵 포인터 이벤트 리스너
-map.on('pointermove', (e) => {
+map.on('pointeron', (e) => {
     const feature = map.forEachFeatureAtPixel(e.pixel, (feature) => feature);
 
     const precision = 4; // 표시할 소수점 이하 자릿수
@@ -191,3 +191,75 @@ document.getElementById("deleteAllMarkers").addEventListener("click", function (
 });
 /* 버튼 클릭 시 모든 마커 삭제하기 끝 */
 
+
+
+/* 버튼 클릭 시 레이어 생성 시작 */
+
+// 시작점과 끝점 좌표를 저장할 변수를 선언합니다.
+var startPoint;
+var endPoint;
+document.getElementById("makeLayer").addEventListener("click", ()=>{
+    confirm("레이어를 생성하시겠습니까?");
+
+    alert("레이어의 시작점을 클릭해주세요.");
+    // 클릭 이벤트를 추가합니다.
+    startPoint = null;
+    endPoint = null;
+
+    // 클릭 이벤트 핸들러를 등록합니다.
+    map.once('click', function (e) {
+        // 클릭한 지점의 좌표를 가져옵니다.
+        var clickedCoordinate = e.coordinate;
+
+        // 시작점이 설정되어 있지 않은 경우 시작점으로 설정합니다.
+        if (startPoint === null) {
+            startPoint = clickedCoordinate;
+            alert("시작점이 설정되었습니다. 이제 다른 지점을 클릭하여 끝점을 설정하세요.");
+
+            // 두 번째 클릭 이벤트를 등록합니다.
+            map.once('click', function (e) {
+                // 클릭한 지점의 좌표를 가져옵니다.
+                var clickedCoordinate = e.coordinate;
+
+                // 끝점이 설정되지 않은 경우 끝점으로 설정하고 라인을 생성합니다.
+                endPoint = clickedCoordinate;
+                addLayer(startPoint, endPoint);
+
+                // 시작점과 끝점을 초기화합니다.
+                startPoint = null;
+                endPoint = null;
+            });
+        }
+    });
+});
+
+
+function addLayer(startPoint, endPoint){
+    // 라인을 생성합니다.
+    var lineCoordinates = [startPoint, endPoint];
+    var line = new ol.Feature({
+        geometry: new ol.geom.LineString(lineCoordinates)
+    });
+
+    // 라인 스타일을 정의합니다.
+    var lineStyle = new ol.style.Style({
+        stroke: new ol.style.Stroke({
+            color: 'blue',
+            width: 10
+        })
+    });
+
+    line.setStyle(lineStyle);
+
+    // 라인을 담을 레이어를 생성합니다.
+    var lineLayer = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            features: [line]
+        })
+    });
+
+    // 마커 레이어를 맵에 추가합니다.
+    map.addLayer(lineLayer);
+}
+
+/* 버튼 클릭 시 레이어 생성 끝 */
