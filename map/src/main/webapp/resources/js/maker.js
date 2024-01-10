@@ -11,6 +11,7 @@ var mousePositionControl = new ol.control.MousePosition({
 });
 /* 마우스 위치 컨트롤 생성 끝 */
 
+
 /* 지도 생성 시작 */
 var map = new ol.Map({
     // 기본 제어 옵션에 마우스 위치 컨트롤을 추가
@@ -37,36 +38,31 @@ var map = new ol.Map({
 var markerArray = []; // 사용자가 입력한 정보를 저장할 배열
 var markerLayer;
 var feature;
-/* 클릭 가능하도록 Interaction 추가 */
-var selectClick;
 var userInput
 /* 버튼 클릭 시 지도에 마커 표시하기 시작 */
 document.getElementById("makeMarker").addEventListener("click", () => {
-    // 이전에 생성된 selectClick 제거
-    if (selectClick) {
-        map.removeInteraction(selectClick);
-    }
 
+    
     userInput = prompt("marker의 이름을 입력하세요.", "");
-
+    
     if (userInput !== null) {
         alert(userInput + "를 표시할 곳을 지도에서 클릭해주세요.");
     }
-
+    
     // 지도에 클릭 이벤트 리스너 추가
     map.once('click', function (event) {
         var coordinate = event.coordinate;
         var lonLat = ol.proj.toLonLat(coordinate);
-
+        
         addMarker(lonLat[0], lonLat[1], userInput);
     });
-
+    
     function addMarker(lon, lat, userInput) {
         feature = new ol.Feature({
             geometry: new ol.geom.Point(ol.proj.fromLonLat([lon, lat])),
             name: userInput
         });
-
+        
         var markerStyle = new ol.style.Style({
             image: new ol.style.Icon({
                 opacity: 1,
@@ -75,31 +71,33 @@ document.getElementById("makeMarker").addEventListener("click", () => {
             }),
             zIndex: 10
         });
-
+        
         var markerSource = new ol.source.Vector({
             features: [feature]
         });
-
+        
         markerLayer = new ol.layer.Vector({
             source: markerSource,
             style: markerStyle
         });
-
+        
         markerArray.push({
             name: userInput,
             feature: feature,
             layer: markerLayer
         });
-
-        // 클릭 가능하도록 Interaction 추가
-        addClickInteraction();
-
+        
+        // 마커생성
+        map.addLayer(markerLayer);
+        
         console.log("Added Marker Feature:", feature.getProperties());
         console.log("Added Marker Layer:", markerLayer.getProperties());
         
         console.log(markerArray);
     }
 });
+/* 버튼 클릭 시 지도에 마커 표시하기 끝 */
+
 
 
 // 팝업 오버레이 생성
@@ -142,40 +140,6 @@ map.on('pointermove', (e) => {
 
 
 
-function addClickInteraction() {
-    // 기존 마커 레이어와 새로 생성된 마커 레이어를 합치기
-    var allMarkerLayers = [markerLayer].concat(markerArray.map(marker => marker.layer));
-    
-    // 클릭 가능하도록 Interaction 추가
-    selectClick = new ol.interaction.Select({
-        condition: ol.events.condition.click,
-        layers: allMarkerLayers,
-        style: null
-    });
-    
-    selectClick.on('select', function (e) {
-        if (e.selected && e.selected.length > 0) {
-            var selectedMarker = e.selected[0];
-            
-            if (selectedMarker && selectedMarker.getProperties) {
-                var selectedFeature = selectedMarker.getProperties().feature;
-                
-                if (selectedFeature && selectedFeature.get) {
-                    var name = selectedFeature.get('name');
-                    var coordinates = selectedFeature.getGeometry().getFlatCoordinates();
-                    
-                    alert("마커 이름: " + name + "\n위치 좌표: " + coordinates);
-                }
-            }
-        }
-    });
-    
-    map.addInteraction(selectClick);
-    map.addLayer(markerLayer);
-}
-
-
-
 /* 버튼 클릭 시 마커 이동하기 시작 */
 document.getElementById("moveMarker").addEventListener("click", ()=>{
     
@@ -185,7 +149,6 @@ document.getElementById("moveMarker").addEventListener("click", ()=>{
     var modify = new ol.interaction.Modify({
         features: new ol.Collection([feature]),
         style: null,
-        
     });
     
     // Modify interaction 이벤트 핸들러 등록
@@ -196,16 +159,16 @@ document.getElementById("moveMarker").addEventListener("click", ()=>{
     modify.on('modifyend', function () {
         map.getTargetElement().style.cursor = 'pointer';
     });
+
     // Modify interaction을 지도에 추가
     map.addInteraction(modify);
     
-    return;
 });
 /* 버튼 클릭 시 마커 이동하기 끝 */
 
 
+
 /* 버튼 클릭 시 모든 마커 삭제하기 시작 */
-/*
 document.getElementById("deleteAllMarkers").addEventListener("click", function () {
     console.log("마커 삭제 전 배열 : ", markerArray);
     
@@ -226,5 +189,5 @@ document.getElementById("deleteAllMarkers").addEventListener("click", function (
     console.log("배열 삭제확인 : ", markerArray);
     alert("모든 마커를 삭제했습니다.");
 });
-*/
+/* 버튼 클릭 시 모든 마커 삭제하기 끝 */
 
